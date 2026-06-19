@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Captcha Generator</title>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500&display=swap" rel="stylesheet"/>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#8052ec,#d161ff);
+    font-family:"Roboto Mono", monospace;
+}
+
+.container{
+    width:32em;
+    background:#fff;
+    padding:5em;
+    border-radius:0.6em;
+    box-shadow:0 1em 2em rgba(0,0,0,0.25);
+}
+
+.wrapper{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin:1em 0;
+}
+
+canvas{
+    border:1px solid #000;
+    border-radius:0.4em;
+}
+
+#reload-button{
+    font-size:26px;
+    width:4.6em;
+    height:70px;
+    background:#8052ec;
+    border:none;
+    border-radius:0.4em;
+    color:#fff;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+#reload-button:hover{
+    background:#6a42d6;
+}
+
+input[type="text"]{
+    width:100%;
+    padding:1em 0.7em;
+    border:1px solid #000;
+    border-radius:0.4em;
+    font-size:1.05em;
+    outline:none;
+}
+
+#submit-button{
+    width:100%;
+    background:#8052ec;
+    color:#fff;
+    font-size:1.2em;
+    border:none;
+    margin-top:1em;
+    padding:0.8em 0;
+    border-radius:0.4em;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+#submit-button:hover{
+    background:#6a42d6;
+}
+
+@media(max-width:600px){
+    .container{
+        width:90%;
+        padding:2em;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="wrapper">
+        <canvas id="canvas" width="200" height="70"></canvas>
+        <button id="reload-button">
+            <i class="fa-solid fa-arrow-rotate-right"></i>
+        </button>
+    </div>
+
+    <input
+        type="text"
+        id="user-input"
+        placeholder="Enter the text in the image"
+    />
+
+    <button id="submit-button">Submit</button>
+</div>
+
+<script>
+// Initial References
+let submitButton = document.getElementById("submit-button");
+let userInput = document.getElementById("user-input");
+let canvas = document.getElementById("canvas");
+let reloadButton = document.getElementById("reload-button");
+let text = "";
+
+// Generate random numbers
+const randomNumber = (min, max) =>
+    Math.floor(Math.random() * (max - min + 1) + min);
+
+// Generate Text
+const textGenerator = () => {
+    let generatedText = "";
+
+    for (let i = 0; i < 3; i++) {
+        generatedText += String.fromCharCode(randomNumber(65, 90)); // A-Z
+        generatedText += String.fromCharCode(randomNumber(97, 122)); // a-z
+        generatedText += String.fromCharCode(randomNumber(48, 57)); // 0-9
+    }
+
+    return generatedText;
+};
+
+// Draw CAPTCHA
+function drawStringOnCanvas(string) {
+    let ctx = canvas.getContext("2d");
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const textColors = [
+        "rgb(0,0,0)",
+        "rgb(130,130,130)"
+    ];
+
+    const letterSpace = 150 / string.length;
+
+    for (let i = 0; i < string.length; i++) {
+        const xInitialSpace = 25;
+
+        ctx.font = "20px Roboto Mono";
+        ctx.fillStyle = textColors[randomNumber(0, 1)];
+
+        ctx.fillText(
+            string[i],
+            xInitialSpace + i * letterSpace,
+            randomNumber(25, 40),
+            100
+        );
+    }
+}
+
+// Generate New CAPTCHA
+function triggerFunction() {
+    userInput.value = "";
+
+    text = textGenerator();
+
+    text = [...text]
+        .sort(() => Math.random() - 0.5)
+        .join("");
+
+    drawStringOnCanvas(text);
+}
+
+// Reload CAPTCHA
+reloadButton.addEventListener("click", triggerFunction);
+
+// Load CAPTCHA on page load
+window.onload = triggerFunction;
+
+// Submit CAPTCHA
+submitButton.addEventListener("click", () => {
+    if (userInput.value === text) {
+        alert("Success");
+        triggerFunction();
+    } else {
+        alert("Incorrect");
+        triggerFunction();
+    }
+});
+</script>
+
+</body>
+</html>
